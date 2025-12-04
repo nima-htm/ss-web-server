@@ -4,7 +4,7 @@ A simple HTTP web server &  reverse proxy written in Go with basic user manageme
 
 ## Features
 
-- RESTful API for user management
+- Static file serving (html/css/js)
 - In-memory user cache with thread-safe operations
 - JSON request/response handling
 
