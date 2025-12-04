@@ -30,7 +30,7 @@ func NewProxyHandler(upstream *config.UpstreamConfig, config *config.LocationCon
 		config:          config,
 		healthStatus:    make(map[string]bool),
 	}
-	// Initialize all servers as healthy
+
 	for _, server := range upstream.Servers {
 		handler.healthStatus[server] = true
 	}
@@ -67,7 +67,7 @@ func (p *ProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		req.Header.Set("X-Real-IP", clientIP)
 
 		for header, value := range p.config.ProxySet {
-			// Substitute variables in header value
+
 			substitutedValue := strings.ReplaceAll(value, "$remote_addr", clientIP)
 			substitutedValue = strings.ReplaceAll(substitutedValue, "$host", req.Header.Get("Host"))
 			substitutedValue = strings.ReplaceAll(substitutedValue, "$scheme", getProto(req))
@@ -90,9 +90,8 @@ func (p *ProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w, r)
 }
 
-// selectUpstreamServer selects an upstream server using round-robin algorithm
 func (p *ProxyHandler) selectUpstreamServer() string {
-	// Perform health check every 30 seconds
+	// Perform health check
 	if time.Since(p.lastHealthCheck) > 30*time.Second {
 		p.performHealthChecks()
 		p.lastHealthCheck = time.Now()
@@ -109,7 +108,7 @@ func (p *ProxyHandler) selectUpstreamServer() string {
 			return server
 		}
 	}
-	// If all servers are unhealthy, return the next one anyway
+
 	server := p.upstreamServers[p.currentServer%uint64(len(p.upstreamServers))]
 	atomic.AddUint64(&p.currentServer, 1)
 	return server
@@ -137,7 +136,6 @@ func (p *ProxyHandler) performHealthChecks() {
 	}
 }
 
-// getPathFromLocation extracts the path after the location prefix
 func (p *ProxyHandler) getPathFromLocation(originalPath string) string {
 	locationPath := p.config.Path
 
@@ -158,7 +156,6 @@ func (p *ProxyHandler) getPathFromLocation(originalPath string) string {
 	return originalPath
 }
 
-// getProto returns the protocol (http or https) for the request
 func getProto(r *http.Request) string {
 	if r.Header.Get("X-Forwarded-Proto") != "" {
 		return r.Header.Get("X-Forwarded-Proto")
@@ -169,7 +166,6 @@ func getProto(r *http.Request) string {
 	return "http"
 }
 
-// getClientIP returns the client IP address
 func getClientIP(r *http.Request) string {
 	forwarded := r.Header.Get("X-Forwarded-For")
 	if forwarded != "" {
@@ -186,7 +182,6 @@ func getClientIP(r *http.Request) string {
 	return host
 }
 
-// HealthCheck performs a health check on the upstream servers
 func (p *ProxyHandler) HealthCheck() map[string]bool {
 	results := make(map[string]bool)
 

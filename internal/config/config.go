@@ -26,13 +26,11 @@ type LocationConfig struct {
 	ProxyPassHeaders []string          `yaml:"proxy_pass_headers"`
 }
 
-// UpstreamConfig represents an upstream server group
 type UpstreamConfig struct {
 	Name    string   `yaml:"name"`
 	Servers []string `yaml:"servers"`
 }
 
-// Config represents the main configuration structure
 type Config struct {
 	Servers   []ServerConfig   `yaml:"servers"`
 	Upstreams []UpstreamConfig `yaml:"upstreams"`
@@ -94,10 +92,8 @@ func (c *Config) ValidateConfig() error {
 			if location.ProxyPass != "" {
 				// Check if it's a direct URL or an upstream reference
 				if strings.HasPrefix(location.ProxyPass, "http://") || strings.HasPrefix(location.ProxyPass, "https://") {
-					// This is a direct URL, validate it as such if needed
-					// For now, we'll just accept valid HTTP/HTTPS URLs
+
 				} else {
-					// This is an upstream reference, validate that the upstream exists
 					upstream := c.GetUpstreamByName(location.ProxyPass)
 					if upstream == nil {
 						return fmt.Errorf("upstream '%s' not found for location '%s'", location.ProxyPass, location.Path)
@@ -116,7 +112,6 @@ func (c *Config) ValidateConfig() error {
 	return nil
 }
 
-// PrintConfig prints the configuration for debugging
 func (c *Config) PrintConfig() {
 	log.Printf("Loaded configuration:")
 	log.Printf("  Servers: %d", len(c.Servers))
