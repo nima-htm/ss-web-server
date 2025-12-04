@@ -11,7 +11,7 @@ A simple HTTP web server &  reverse proxy written in Go with basic user manageme
 
 ## Documentation
 
-To know more about the details, installation and test the project you can check on [Documentation](https://github.com/nima-htm/ss-web-server/blob/main/.DOCUMENTATION.md).
+To know more about the details, installation and test the project you can check on [Documentation](https://github.com/nima-htm/ss-web-server/blob/main/DOCUMENTATION.md).
 
 
 ## Contribute
