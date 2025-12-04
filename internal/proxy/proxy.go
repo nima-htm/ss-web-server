@@ -59,7 +59,7 @@ func (p *ProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 		req.URL.Scheme = remote.Scheme
 		req.URL.Host = remote.Host
-		req.URL.Path = p.getPathFromLocation(r.URL.Path)
+		req.URL.Path = p.rewritePath(r.URL.Path, remote)
 
 		clientIP := getClientIP(req)
 		req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
@@ -136,23 +136,43 @@ func (p *ProxyHandler) performHealthChecks() {
 	}
 }
 
-func (p *ProxyHandler) getPathFromLocation(originalPath string) string {
-	locationPath := p.config.Path
+// joinURLPath safely joins URL path segments without producing double slashes.
+func joinURLPath(a, b string) string {
+	a = strings.TrimRight(a, "/")
+	b = strings.TrimLeft(b, "/")
 
-	if strings.HasPrefix(originalPath, locationPath) {
-		remainingPath := strings.TrimPrefix(originalPath, locationPath)
+	if a == "" && b == "" {
+		return "/"
+	}
+	if a == "" {
+		return "/" + b
+	}
+	if b == "" {
+		return a
+	}
+	return a + "/" + b
+}
 
-		if !strings.HasSuffix(locationPath, "/") && strings.HasPrefix(remainingPath, "/") {
-			return remainingPath
+// rewritePath implements nginx-like proxy_pass behavior based on the location
+// path and upstream URL. If the location ends with "/", the location prefix
+// is stripped from the incoming path and appended to the upstream URL path.
+// If the location does NOT end with "/", nginx forwards the path unchanged.
+func (p *ProxyHandler) rewritePath(originalPath string, upstream *url.URL) string {
+	loc := p.config.Path
+
+	// If location ends with "/", nginx strips the prefix.
+	if strings.HasSuffix(loc, "/") {
+		trimmed := strings.TrimPrefix(originalPath, loc)
+
+		baseUp := upstream.Path
+		if baseUp == "" {
+			baseUp = "/"
 		}
 
-		if strings.HasSuffix(locationPath, "/") && remainingPath != "" && !strings.HasPrefix(remainingPath, "/") {
-			return "/" + remainingPath
-		}
-
-		return remainingPath
+		return joinURLPath(baseUp, trimmed)
 	}
 
+	// No trailing slash → nginx does not rewrite the path.
 	return originalPath
 }
 
