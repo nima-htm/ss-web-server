@@ -1,6 +1,6 @@
 # SS Web Server and reverse proxy
 
-A simple HTTP web server written in Go with basic user management capabilities.
+A simple HTTP web server &  reverse proxy written in Go with basic user management capabilities.
 
 ## Features
 
@@ -9,10 +9,11 @@ A simple HTTP web server written in Go with basic user management capabilities.
 - JSON request/response handling
 
 
-## Running
+## Documentation
 
-```bash
-go run main.go
-```
+To know more about the details, installation and test the project you can go on []
 
-Server listens on port `8000`.
+
+## Contribute
+
+Please share your ideas about this projects through the issues, and send your opinions or criticism to my email address : nimahassani84@gmail.com 
